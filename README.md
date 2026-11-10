@@ -1,1 +1,3 @@
-# superintuition
+# Super Intuition
+
+Accelerated-Learning Platform.

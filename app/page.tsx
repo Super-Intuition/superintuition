@@ -5,6 +5,7 @@ import type { PullSummary, PullDetail, PullFile, RepoMeta } from "@/lib/github";
 import ConversationPanel from "./components/ConversationPanel";
 import ChatPanel from "./components/ChatPanel";
 import DiffFile from "./components/DiffFile";
+import Logo from "./components/Logo";
 
 async function getJSON<T>(url: string): Promise<T> {
   const res = await fetch(url);
@@ -69,9 +70,7 @@ export default function Home() {
       {/* top bar */}
       <header className="flex h-12 shrink-0 items-center justify-between border-b border-[var(--border)] bg-[var(--panel)] px-4">
         <div className="flex items-center gap-3">
-          <span className="flex h-5 w-5 items-center justify-center rounded bg-gradient-to-br from-[#2f81f7] to-[#8957e5] text-[10px] font-bold text-white">
-            S
-          </span>
+          <Logo className="h-6 w-6 text-[var(--text)]" />
           <span className="text-sm font-semibold">SuperIntuition</span>
           {repo && (
             <span className="mono rounded border border-[var(--border)] px-2 py-0.5 text-xs text-[var(--text-muted)]">

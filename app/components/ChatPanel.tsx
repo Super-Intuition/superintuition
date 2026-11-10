@@ -1,20 +1,13 @@
 "use client";
 
 import { useState } from "react";
-
-function Logo() {
-  return (
-    <span className="flex h-4 w-4 items-center justify-center rounded-sm bg-gradient-to-br from-[#2f81f7] to-[#8957e5] text-[8px] font-bold text-white">
-      S
-    </span>
-  );
-}
+import Logo from "./Logo";
 
 function AssistantMsg({ children }: { children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
       <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
-        <Logo /> SuperIntuition
+        <Logo className="h-4 w-4 text-[var(--text)]" /> SuperIntuition
       </div>
       <p className="text-[13px] leading-5 text-[var(--text)]">{children}</p>
     </div>

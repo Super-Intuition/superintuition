@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { fetchRepoMeta, GitHubError } from "@/lib/github";
+import { fetchRepoMeta } from "@/lib/github";
+import { errorResponse } from "@/lib/api";
 
 export async function GET() {
   try {
@@ -7,10 +8,4 @@ export async function GET() {
   } catch (e) {
     return errorResponse(e);
   }
-}
-
-export function errorResponse(e: unknown) {
-  const status = e instanceof GitHubError ? e.status : 500;
-  const message = e instanceof Error ? e.message : "Unknown error";
-  return NextResponse.json({ error: message }, { status });
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { fetchPull } from "@/lib/github";
-import { errorResponse } from "@/app/api/repo/route";
+import { errorResponse } from "@/lib/api";
 
 export async function GET(
   _req: Request,

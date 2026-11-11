@@ -1,6 +1,6 @@
 import { Avatar } from "@astryxdesign/core/Avatar";
 import { Text } from "@astryxdesign/core/Text";
-import { HStack } from "@astryxdesign/core/Stack";
+import { HStack, VStack } from "@astryxdesign/core/Stack";
 import type { PullDetail } from "@/lib/github";
 import Markdown from "./Markdown";
 
@@ -18,7 +18,7 @@ function timeAgo(iso: string): string {
 
 export default function ConversationPanel({ pull }: { pull: PullDetail }) {
   return (
-    <div className="flex h-full flex-col overflow-y-auto border-r border-border bg-surface">
+    <VStack gap={0} className="min-h-full bg-surface">
       <HStack
         align="center"
         gap={2}
@@ -28,21 +28,19 @@ export default function ConversationPanel({ pull }: { pull: PullDetail }) {
       >
         <Avatar src={pull.userAvatar} name={pull.user} size="sm" />
         <Text type="supporting">
-          <Text weight="semibold" color="primary">
+          <Text as="span" weight="semibold" color="primary">
             {pull.user}
           </Text>{" "}
           commented {timeAgo(pull.createdAt)}
         </Text>
       </HStack>
-      <div className="px-5 py-4">
+      <VStack gap={0} paddingInline={5} paddingBlock={4}>
         {pull.body ? (
           <Markdown source={pull.body} />
         ) : (
-          <Text type="supporting" className="italic">
-            No description provided.
-          </Text>
+          <Text type="supporting">No description provided.</Text>
         )}
-      </div>
-    </div>
+      </VStack>
+    </VStack>
   );
 }

@@ -4,39 +4,76 @@ import { useState } from "react";
 import { Text } from "@astryxdesign/core/Text";
 import { Icon } from "@astryxdesign/core/Icon";
 import { IconButton } from "@astryxdesign/core/IconButton";
-import { HStack } from "@astryxdesign/core/Stack";
+import { CheckboxInput } from "@astryxdesign/core/CheckboxInput";
+import { Card } from "@astryxdesign/core/Card";
+import { HStack, VStack } from "@astryxdesign/core/Stack";
 import type { PullFile } from "@/lib/github";
-import { parsePatch } from "@/lib/diff";
+import { parsePatch, type DiffRow } from "@/lib/diff";
 
-function StatPill({ additions, deletions }: { additions: number; deletions: number }) {
-  // Five squares, GitHub-style: green for add, red for del, neutral for none.
-  const total = additions + deletions;
-  const greens = total === 0 ? 0 : Math.round((additions / total) * 5);
-  const reds = total === 0 ? 0 : Math.min(5 - greens, Math.ceil((deletions / total) * 5));
-  const squares = Array.from({ length: 5 }, (_, i) => {
-    if (i < greens) return "add";
-    if (i < greens + reds) return "del";
-    return "none";
-  });
+// Structural widths for the line-number gutters. Raw px is intentional here:
+// the scaffold guide reserves px for structural widths, everything else uses tokens.
+const GUTTER = 52;
+
+function Gutter({ value }: { value: number | null | undefined }) {
   return (
-    <span className="flex items-center gap-2 font-mono text-xs">
-      {additions > 0 && <span className="text-text-green">+{additions}</span>}
-      {deletions > 0 && <span className="text-text-red">-{deletions}</span>}
-      <span className="flex gap-[2px]">
-        {squares.map((s, i) => (
-          <span
-            key={i}
-            className={`h-2 w-2 rounded-[2px] ${
-              s === "add"
-                ? "bg-text-green"
-                : s === "del"
-                  ? "bg-text-red"
-                  : "bg-track"
-            }`}
-          />
-        ))}
-      </span>
-    </span>
+    <HStack
+      width={GUTTER}
+      justify="end"
+      paddingInline={2}
+      paddingBlock={0.5}
+      align="start"
+      className="shrink-0 select-none border-r border-border"
+    >
+      <Text type="code" color="secondary" hasTabularNumbers>
+        {value ?? ""}
+      </Text>
+    </HStack>
+  );
+}
+
+function Row({ row }: { row: DiffRow }) {
+  if (row.type === "hunk") {
+    return (
+      <HStack gap={0} className="bg-background-blue">
+        <HStack
+          paddingInline={3}
+          paddingBlock={0.5}
+          className="min-w-0 flex-1"
+        >
+          <Text type="code" color="accent" className="whitespace-pre-wrap break-all">
+            {row.content}
+          </Text>
+        </HStack>
+      </HStack>
+    );
+  }
+
+  const bg =
+    row.type === "add"
+      ? "bg-background-green"
+      : row.type === "del"
+        ? "bg-background-red"
+        : "";
+  const sign = row.type === "add" ? "+" : row.type === "del" ? "-" : " ";
+
+  return (
+    <HStack gap={0} align="stretch" className={bg}>
+      <Gutter value={row.oldLine} />
+      <Gutter value={row.newLine} />
+      <HStack
+        paddingInline={3}
+        paddingBlock={0.5}
+        align="start"
+        className="min-w-0 flex-1"
+      >
+        <Text type="code" className="whitespace-pre-wrap break-all">
+          <Text as="span" type="code" color="secondary" className="select-none">
+            {sign}
+          </Text>
+          {row.content}
+        </Text>
+      </HStack>
+    </HStack>
   );
 }
 
@@ -46,7 +83,7 @@ export default function DiffFile({ file }: { file: PullFile }) {
   const rows = parsePatch(file.patch);
 
   return (
-    <div className="overflow-hidden rounded-md border border-border bg-surface">
+    <Card padding={0}>
       {/* file header */}
       <HStack
         align="center"
@@ -60,87 +97,51 @@ export default function DiffFile({ file }: { file: PullFile }) {
           <IconButton
             variant="ghost"
             size="sm"
-            label={open ? "Collapse" : "Expand"}
+            label={open ? "Collapse file" : "Expand file"}
             onClick={() => setOpen((o) => !o)}
-            icon={
-              <Icon
-                icon="chevronDown"
-                className={open ? "" : "-rotate-90"}
-              />
-            }
+            icon={<Icon icon="chevronDown" className={open ? "" : "-rotate-90"} />}
           />
-          <Text className="truncate font-mono" type="code">
+          <Text type="code" maxLines={1} className="min-w-0">
             {file.filename}
           </Text>
         </HStack>
         <HStack align="center" gap={3} className="shrink-0">
-          <StatPill additions={file.additions} deletions={file.deletions} />
-          <label className="flex cursor-pointer items-center gap-1.5 rounded border border-border px-2 py-1 text-xs text-secondary hover:bg-muted">
-            <input
-              type="checkbox"
-              checked={viewed}
-              onChange={(e) => setViewed(e.target.checked)}
-              className="accent-accent"
-            />
-            Viewed
-          </label>
+          {file.additions > 0 && (
+            <Text type="code" hasTabularNumbers className="text-text-green">
+              +{file.additions}
+            </Text>
+          )}
+          {file.deletions > 0 && (
+            <Text type="code" hasTabularNumbers className="text-text-red">
+              -{file.deletions}
+            </Text>
+          )}
+          <CheckboxInput
+            label="Viewed"
+            size="sm"
+            value={viewed}
+            onChange={setViewed}
+          />
         </HStack>
       </HStack>
 
       {/* diff body */}
-      {open && (
-        <div className="overflow-x-auto">
-          {rows.length === 0 ? (
-            <Text type="supporting" className="block px-4 py-3">
+      {open &&
+        (rows.length === 0 ? (
+          <HStack paddingInline={4} paddingBlock={3}>
+            <Text type="supporting">
               {file.status === "renamed"
                 ? "File renamed — no content changes."
                 : "No textual diff available (binary or too large)."}
             </Text>
-          ) : (
-            <table className="w-full border-collapse font-mono text-[12px] leading-5">
-              <tbody>
-                {rows.map((r, i) => {
-                  if (r.type === "hunk") {
-                    return (
-                      <tr key={i} className="bg-background-blue text-text-blue">
-                        <td className="select-none border-r border-border px-2 text-right align-top" />
-                        <td className="select-none border-r border-border px-2 text-right align-top" />
-                        <td className="whitespace-pre-wrap px-3 py-0.5">
-                          {r.content}
-                        </td>
-                      </tr>
-                    );
-                  }
-                  const bg =
-                    r.type === "add"
-                      ? "bg-background-green"
-                      : r.type === "del"
-                        ? "bg-background-red"
-                        : "";
-                  const sign =
-                    r.type === "add" ? "+" : r.type === "del" ? "-" : " ";
-                  return (
-                    <tr key={i} className={bg}>
-                      <td className="w-[1%] select-none whitespace-nowrap border-r border-border px-2 text-right align-top text-secondary">
-                        {r.oldLine ?? ""}
-                      </td>
-                      <td className="w-[1%] select-none whitespace-nowrap border-r border-border px-2 text-right align-top text-secondary">
-                        {r.newLine ?? ""}
-                      </td>
-                      <td className="whitespace-pre-wrap px-3 align-top text-primary">
-                        <span className="select-none text-secondary">
-                          {sign}
-                        </span>
-                        {r.content}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
-        </div>
-      )}
-    </div>
+          </HStack>
+        ) : (
+          <VStack gap={0}>
+            {rows.map((r, i) => (
+              <Row key={i} row={r} />
+            ))}
+          </VStack>
+        ))}
+    </Card>
   );
 }

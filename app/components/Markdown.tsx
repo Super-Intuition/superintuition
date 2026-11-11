@@ -1,4 +1,10 @@
-import { Fragment, type ReactNode } from "react";
+import { type ReactNode } from "react";
+import { Text } from "@astryxdesign/core/Text";
+import { Code } from "@astryxdesign/core/Code";
+import { Link } from "@astryxdesign/core/Link";
+import { Heading } from "@astryxdesign/core/Heading";
+import { CheckboxInput } from "@astryxdesign/core/CheckboxInput";
+import { HStack, VStack } from "@astryxdesign/core/Stack";
 
 // Minimal, dependency-free markdown good enough for PR bodies:
 // headings, bullet/number lists, task-list checkboxes, inline `code` and links.
@@ -15,26 +21,26 @@ function renderInline(text: string, keyBase: string): ReactNode[] {
     const token = m[0];
     if (token.startsWith("`")) {
       nodes.push(
-        <code
+        <Code
           key={`${keyBase}-${k++}`}
-          className="font-mono rounded bg-muted px-1 py-0.5 text-[0.85em] text-text-blue"
+          size="inherit"
+          className="text-text-blue"
         >
           {token.slice(1, -1)}
-        </code>,
+        </Code>,
       );
     } else {
       const label = token.slice(1, token.indexOf("]"));
       const href = token.slice(token.indexOf("(") + 1, -1);
       nodes.push(
-        <a
+        <Link
           key={`${keyBase}-${k++}`}
           href={href}
-          className="text-accent hover:underline"
-          target="_blank"
-          rel="noreferrer"
+          type="inherit"
+          isExternalLink
         >
           {label}
-        </a>,
+        </Link>,
       );
     }
     last = m.index + token.length;
@@ -52,9 +58,9 @@ export default function Markdown({ source }: { source: string }) {
   const flush = () => {
     if (list.length) {
       out.push(
-        <ul key={`ul-${listKey++}`} className="my-2 space-y-1 pl-1">
+        <VStack key={`ul-${listKey++}`} gap={1.5}>
           {list}
-        </ul>,
+        </VStack>,
       );
       list = [];
     }
@@ -64,15 +70,12 @@ export default function Markdown({ source }: { source: string }) {
     const h = /^(#{1,6})\s+(.*)$/.exec(line);
     if (h) {
       flush();
-      const level = h[1].length;
-      const size = level <= 1 ? "text-xl" : level === 2 ? "text-lg" : "text-base";
+      // Clamp to 2–6 so these never collide with the page-level h1.
+      const level = Math.min(Math.max(h[1].length, 2), 6) as 2 | 3 | 4 | 5 | 6;
       out.push(
-        <h3
-          key={`h-${i}`}
-          className={`${size} mt-5 mb-2 font-semibold text-primary`}
-        >
+        <Heading key={`h-${i}`} level={level} weight="semibold">
           {renderInline(h[2], `h-${i}`)}
-        </h3>,
+        </Heading>,
       );
       return;
     }
@@ -81,17 +84,19 @@ export default function Markdown({ source }: { source: string }) {
     if (task) {
       const checked = task[1].toLowerCase() === "x";
       list.push(
-        <li key={`li-${i}`} className="flex items-start gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={checked}
-            readOnly
-            className="mt-1 accent-accent"
+        <HStack key={`li-${i}`} gap={2} align="start">
+          <CheckboxInput
+            label={task[2]}
+            isLabelHidden
+            size="sm"
+            value={checked}
+            isReadOnly
+            onChange={() => {}}
           />
-          <span className="text-primary">
+          <Text type="body" size="sm">
             {renderInline(task[2], `li-${i}`)}
-          </span>
-        </li>,
+          </Text>
+        </HStack>,
       );
       return;
     }
@@ -99,29 +104,28 @@ export default function Markdown({ source }: { source: string }) {
     const bullet = /^\s*[-*]\s+(.*)$/.exec(line);
     if (bullet) {
       list.push(
-        <li
-          key={`li-${i}`}
-          className="flex items-start gap-2 text-sm text-primary"
-        >
-          <span className="mt-[2px] text-secondary">•</span>
-          <span>{renderInline(bullet[1], `li-${i}`)}</span>
-        </li>,
+        <HStack key={`li-${i}`} gap={2} align="start">
+          <Text type="body" size="sm" color="secondary">
+            •
+          </Text>
+          <Text type="body" size="sm">
+            {renderInline(bullet[1], `li-${i}`)}
+          </Text>
+        </HStack>,
       );
       return;
     }
 
     flush();
-    if (line.trim() === "") {
-      out.push(<div key={`sp-${i}`} className="h-2" />);
-    } else {
+    if (line.trim() !== "") {
       out.push(
-        <p key={`p-${i}`} className="my-1 text-sm leading-6 text-primary">
+        <Text key={`p-${i}`} type="body" size="sm" display="block">
           {renderInline(line, `p-${i}`)}
-        </p>,
+        </Text>,
       );
     }
   });
   flush();
 
-  return <Fragment>{out}</Fragment>;
+  return <VStack gap={2}>{out}</VStack>;
 }

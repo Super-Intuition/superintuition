@@ -1,12 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AppShell } from "@astryxdesign/core/AppShell";
+import {
+  Layout,
+  LayoutHeader,
+  LayoutPanel,
+  LayoutContent,
+} from "@astryxdesign/core/Layout";
 import { Text } from "@astryxdesign/core/Text";
+import { Code } from "@astryxdesign/core/Code";
 import { Heading } from "@astryxdesign/core/Heading";
 import { Badge } from "@astryxdesign/core/Badge";
 import { Banner } from "@astryxdesign/core/Banner";
 import { Selector } from "@astryxdesign/core/Selector";
-import { HStack } from "@astryxdesign/core/Stack";
+import { HStack, VStack } from "@astryxdesign/core/Stack";
+import { useMediaQuery } from "@astryxdesign/core/hooks";
 import packageInfo from "@/package.json";
 import type { PullSummary, PullDetail, PullFile, RepoMeta } from "@/lib/github";
 import ConversationPanel from "./components/ConversationPanel";
@@ -33,6 +42,16 @@ export default function Home() {
   const [files, setFiles] = useState<PullFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Responsive contract (max-width queries default to false, so the full
+  // three-pane desktop layout renders first and panels yield as width drops):
+  //   >=1280  conversation | diff | assistant
+  //   768–1279  diff | assistant   (conversation yields)
+  //   <768  diff only               (assistant yields)
+  const hideConversation = useMediaQuery("(max-width: 1279px)");
+  const hideAssistant = useMediaQuery("(max-width: 767px)");
+  // Below this the full PR title would crowd out the version; show just "#n".
+  const compactSelector = useMediaQuery("(max-width: 640px)");
 
   // Load repo meta + pull list once.
   useEffect(() => {
@@ -75,130 +94,169 @@ export default function Home() {
   }, [active]);
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-body text-primary">
-      {/* top bar */}
-      <HStack
-        align="center"
-        justify="between"
-        gap={3}
-        paddingInline={4}
-        className="h-12 shrink-0 border-b border-border bg-surface"
-      >
-        <HStack align="center" gap={3}>
-          <Logo className="h-6 w-6 text-primary" />
-          <Text weight="semibold" type="label">
-            SuperIntuition
-          </Text>
-          {repo && (
-            <HStack align="center" gap={2} className="hidden md:flex">
-              <Text type="code" color="secondary">
-                {repo.full}
-              </Text>
-              {repo.private && <Badge variant="yellow" label="private" />}
+    <AppShell height="fill" variant="surface" contentPadding={0}>
+      <Layout
+        height="fill"
+        header={
+          <LayoutHeader hasDivider padding={0} height={52}>
+            <HStack
+              align="center"
+              justify="between"
+              gap={3}
+              paddingInline={4}
+              className="h-full bg-surface"
+            >
+              <HStack align="center" gap={2} className="min-w-0">
+                <Logo className="h-6 w-6 shrink-0 text-primary" />
+                <Text
+                  weight="semibold"
+                  type="label"
+                  textWrap="nowrap"
+                  className="hidden shrink-0 sm:inline"
+                >
+                  SuperIntuition
+                </Text>
+                {repo && (
+                  <HStack
+                    align="center"
+                    gap={2}
+                    className="hidden min-w-0 lg:flex"
+                  >
+                    <Text type="code" color="secondary" maxLines={1}>
+                      {repo.full}
+                    </Text>
+                    {repo.private && <Badge variant="yellow" label="private" />}
+                  </HStack>
+                )}
+              </HStack>
+              <HStack align="center" gap={3} className="min-w-0">
+                <HStack className="min-w-0">
+                  <Selector
+                    label="Pull request"
+                    isLabelHidden
+                    size="sm"
+                    variant="secondary"
+                    statusVariant="tooltip"
+                    placeholder="No pull requests"
+                    value={active != null ? String(active) : undefined}
+                    onChange={(v) => setActive(Number(v))}
+                    isDisabled={!pulls.length}
+                    width={compactSelector ? 104 : undefined}
+                    renderValue={(o) =>
+                      compactSelector ? `#${o.value}` : o.label
+                    }
+                    options={pulls.map((p) => ({
+                      value: String(p.number),
+                      label: `#${p.number} · ${p.title}`,
+                    }))}
+                  />
+                </HStack>
+                <Text
+                  type="supporting"
+                  textWrap="nowrap"
+                  className="shrink-0"
+                  aria-label={`App version ${version}`}
+                >
+                  v{version}
+                </Text>
+              </HStack>
             </HStack>
-          )}
-        </HStack>
-        <HStack align="center" gap={2}>
-          <Selector
-            label="Pull request"
-            isLabelHidden
-            size="sm"
-            placeholder="No pull requests"
-            value={active != null ? String(active) : undefined}
-            onChange={(v) => setActive(Number(v))}
-            isDisabled={!pulls.length}
-            options={pulls.map((p) => ({
-              value: String(p.number),
-              label: `#${p.number} · ${p.title}`,
-            }))}
-          />
-          <Text
-            type="supporting"
-            textWrap="nowrap"
-            className="shrink-0"
-            aria-label={`App version ${version}`}
-          >
-            v{version}
-          </Text>
-        </HStack>
-      </HStack>
-
-      {/* body: three columns */}
-      <div className="grid min-h-0 flex-1 grid-cols-[minmax(280px,340px)_1fr_minmax(300px,380px)]">
-        {/* left: conversation */}
-        <div className="min-h-0 overflow-hidden">
-          {detail ? (
-            <ConversationPanel pull={detail} />
-          ) : (
-            <div className="h-full border-r border-border bg-surface" />
-          )}
-        </div>
-
-        {/* center: diff */}
-        <main className="min-h-0 overflow-y-auto bg-body p-4">
-          {error && (
-            <Banner
-              status="error"
-              container="card"
-              title={error}
-              description={
-                error.includes("not set") ? (
-                  <Text type="supporting">
-                    Copy <span className="font-mono">.env.example</span> to{" "}
-                    <span className="font-mono">.env</span> and set GITHUB_TOKEN
-                    / GITHUB_REPO.
-                  </Text>
-                ) : undefined
-              }
-              collapsible={false}
-            />
-          )}
-          {loading && !error && (
-            <Text type="supporting">Loading…</Text>
-          )}
-          {!loading && !error && detail && (
-            <div className="flex flex-col gap-4">
-              <HStack align="center" gap={2}>
-                <Heading level={1} weight="semibold">
-                  {detail.title}
-                </Heading>
-                <Text color="secondary" className="font-mono">
-                  #{detail.number}
-                </Text>
-              </HStack>
-              <HStack gap={3} wrap="wrap" className="font-mono">
-                <Text type="supporting">{files.length} files changed</Text>
-                {detail.additions != null && (
-                  <Text type="supporting" className="text-text-green">
-                    +{detail.additions}
-                  </Text>
-                )}
-                {detail.deletions != null && (
-                  <Text type="supporting" className="text-text-red">
-                    -{detail.deletions}
-                  </Text>
-                )}
+          </LayoutHeader>
+        }
+        start={
+          hideConversation || !detail ? undefined : (
+            <LayoutPanel
+              width={340}
+              hasDivider
+              label="Pull request conversation"
+            >
+              <ConversationPanel pull={detail} />
+            </LayoutPanel>
+          )
+        }
+        end={
+          hideAssistant ? undefined : (
+            <LayoutPanel
+              width={380}
+              hasDivider
+              padding={0}
+              isScrollable={false}
+              label="Review assistant"
+            >
+              <ChatPanel prNumber={active ?? 0} />
+            </LayoutPanel>
+          )
+        }
+        content={
+          <LayoutContent padding={4}>
+            <VStack gap={4}>
+              {error && (
+                <Banner
+                  status="error"
+                  container="card"
+                  title={error}
+                  description={
+                    error.includes("not set") ? (
+                      <Text type="supporting">
+                        Copy <Code>.env.example</Code> to <Code>.env</Code> and
+                        set GITHUB_TOKEN / GITHUB_REPO.
+                      </Text>
+                    ) : undefined
+                  }
+                  collapsible={false}
+                />
+              )}
+              {loading && !error && <Text type="supporting">Loading…</Text>}
+              {!loading && !error && detail && (
+                <>
+                  <VStack gap={2}>
+                    <HStack align="center" gap={2} wrap="wrap">
+                      <Heading level={1} weight="semibold">
+                        {detail.title}
+                      </Heading>
+                      <Code color="secondary">#{detail.number}</Code>
+                    </HStack>
+                    <HStack gap={3} wrap="wrap" align="center">
+                      <Text type="supporting">
+                        {files.length} files changed
+                      </Text>
+                      {detail.additions != null && (
+                        <Text
+                          type="supporting"
+                          hasTabularNumbers
+                          className="text-text-green"
+                        >
+                          +{detail.additions}
+                        </Text>
+                      )}
+                      {detail.deletions != null && (
+                        <Text
+                          type="supporting"
+                          hasTabularNumbers
+                          className="text-text-red"
+                        >
+                          -{detail.deletions}
+                        </Text>
+                      )}
+                      <Code color="secondary">
+                        {detail.baseRef} ← {detail.headRef}
+                      </Code>
+                    </HStack>
+                  </VStack>
+                  {files.map((f) => (
+                    <DiffFile key={f.filename} file={f} />
+                  ))}
+                </>
+              )}
+              {!loading && !error && !detail && !pulls.length && (
                 <Text type="supporting">
-                  {detail.baseRef} ← {detail.headRef}
+                  No pull requests found in this repository.
                 </Text>
-              </HStack>
-              {files.map((f) => (
-                <DiffFile key={f.filename} file={f} />
-              ))}
-            </div>
-          )}
-          {!loading && !error && !detail && !pulls.length && (
-            <Text type="supporting">
-              No pull requests found in this repository.
-            </Text>
-          )}
-        </main>
-
-        {/* right: chat */}
-        <div className="min-h-0 overflow-hidden border-l border-border">
-          <ChatPanel prNumber={active ?? 0} />
-        </div>
-      </div>
-    </div>
+              )}
+            </VStack>
+          </LayoutContent>
+        }
+      />
+    </AppShell>
   );
 }

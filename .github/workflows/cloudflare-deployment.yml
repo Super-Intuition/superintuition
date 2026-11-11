@@ -7,6 +7,7 @@ on:
 
 permissions:
   checks: read
+  contents: read
 
 jobs:
   deployment:
@@ -47,3 +48,13 @@ jobs:
               .addRaw(`No completed Cloudflare check for commit ${context.sha} within 30 minutes. Check Workers Builds and its GitHub integration.\n`)
               .write();
             core.setFailed('Timed out waiting for Cloudflare deployment.');
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test deployment health checks
+        run: node --test scripts/check-deployment.test.mjs
+      - name: Check deployed application
+        env:
+          DEPLOYMENT_URL: ${{ vars.DEPLOYMENT_URL }}
+        run: node scripts/check-deployment.mjs

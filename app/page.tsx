@@ -1,11 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Text } from "@astryxdesign/core/Text";
+import packageInfo from "@/package.json";
 import type { PullSummary, PullDetail, PullFile, RepoMeta } from "@/lib/github";
 import ConversationPanel from "./components/ConversationPanel";
 import ChatPanel from "./components/ChatPanel";
 import DiffFile from "./components/DiffFile";
 import Logo from "./components/Logo";
+
+const version = packageInfo.version;
 
 async function getJSON<T>(url: string): Promise<T> {
   const res = await fetch(url);
@@ -73,7 +77,7 @@ export default function Home() {
           <Logo className="h-6 w-6 text-[var(--text)]" />
           <span className="text-sm font-semibold">SuperIntuition</span>
           {repo && (
-            <span className="mono rounded border border-[var(--border)] px-2 py-0.5 text-xs text-[var(--text-muted)]">
+            <span className="mono hidden rounded border border-[var(--border)] px-2 py-0.5 text-xs text-[var(--text-muted)] md:inline">
               {repo.full}
               {repo.private && <span className="ml-1 text-[#d29922]">· private</span>}
             </span>
@@ -85,7 +89,7 @@ export default function Home() {
             value={active ?? ""}
             onChange={(e) => setActive(Number(e.target.value))}
             disabled={!pulls.length}
-            className="mono max-w-[380px] rounded border border-[var(--border)] bg-[var(--panel-2)] px-2 py-1 text-xs text-[var(--text)] focus:outline-none"
+            className="mono max-w-24 rounded border border-[var(--border)] bg-[var(--panel-2)] px-2 py-1 text-xs text-[var(--text)] focus:outline-none sm:max-w-96"
           >
             {pulls.map((p) => (
               <option key={p.number} value={p.number}>
@@ -93,6 +97,9 @@ export default function Home() {
               </option>
             ))}
           </select>
+          <Text type="supporting" textWrap="nowrap" className="shrink-0" aria-label={`App version ${version}`}>
+            v{version}
+          </Text>
         </div>
       </header>
 

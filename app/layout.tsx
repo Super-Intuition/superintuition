@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import "./layers.css";
 import "./globals.css";
+import AppTheme from "./components/AppTheme";
 
 export const metadata: Metadata = {
   title: "SuperIntuition — Code Review",
@@ -13,8 +15,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" data-astryx-theme="neutral" suppressHydrationWarning>
+      <body>
+        <AppTheme>{children}</AppTheme>
+      </body>
     </html>
   );
 }

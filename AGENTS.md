@@ -9,11 +9,19 @@
 - Use a branch only when there is a concrete justification. Keep it alive for hours, not days; integrate promptly with a fast-forward merge into `main`, then delete it locally and remotely if it was pushed.
 - If a change breaks `main`, stop unrelated work and fix it immediately. If a safe fix is not immediate, revert the offending commit immediately, restore the checks, and push the recovery. Do not leave `main` broken while investigating.
 
+### Git commits
+
+- Use the [git-commit skill from github/awesome-copilot](https://www.skills.sh/github/awesome-copilot/git-commit) for creating commits and splitting changes into atomic commits. Read the project-local [.agents/skills/git-commit/SKILL.md](.agents/skills/git-commit/SKILL.md) before committing.
+- Follow its diff analysis, focused staging, commit type/scope selection, and Git safety checks. Stage only files belonging to the current change; preserve unrelated user edits.
+- Prefix the skill's Conventional Commits-style subject with the application version: `vMAJOR.MINOR.PATCH <type>(<optional-scope>): <summary>`. Example: `v0.2.1 fix(viewer): handle empty results`. Keep the full subject, including the version, within 72 characters where possible.
+- The version-first format is an intentional repository override of the skill's default type-first format. Preserve its breaking-change markers and footer conventions after the version prefix.
+- This repository's direct-to-`main`, commit-and-push defaults remain in force. The standing user instruction authorizes pushing completed work to `origin/main`; the skill's commit-only scope does not remove that authorization.
+
 ## Versioning
 
 - Use semantic versioning: `MAJOR.MINOR.PATCH`. Increment major for incompatible changes, minor for backward-compatible features, and patch for backward-compatible fixes.
 - `package.json` is the single source of truth for the application version. Keep the root version and root package entry in `package-lock.json` synchronized; use `npm version <version> --no-git-tag-version`.
-- Include the resulting version in **every commit message**, including documentation, maintenance, and reverts. Example: `fix: handle empty results (v0.2.1)`.
+- Start **every commit subject** with the resulting version for readability, including documentation, maintenance, and reverts. Example: `v0.2.1 fix: handle empty results`. Do not put the version at the end or only in the body.
 - Bump the version with application changes. Documentation-only changes may retain the current application version, but must still include it in the commit message. Do not silently downgrade the version during a recovery.
 - Display `vMAJOR.MINOR.PATCH` in the top-right of the application on every deployed screen, including loading, empty, and error states. Read it from the version source, never a second hardcoded string.
 - Verify that the displayed version matches the built commit and stays visible at narrow viewport widths. A successful push alone is not proof of deployment; report deployment status only when verified.

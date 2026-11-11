@@ -1,0 +1,49 @@
+name: Cloudflare deployment
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  checks: read
+
+jobs:
+  deployment:
+    name: Workers Builds status
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Wait for Cloudflare deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deadline = Date.now() + 30 * 60 * 1000;
+            const name = 'Workers Builds: superintuition';
+            let last;
+            while (Date.now() < deadline) {
+              const checks = await github.paginate(github.rest.checks.listForRef, {
+                ...context.repo, ref: context.sha, check_name: name, per_page: 100,
+              });
+              last = checks
+                .filter(check => check.app?.slug === 'cloudflare-workers-and-pages')
+                .sort((a, b) => b.id - a.id)[0];
+              core.info(`${context.sha}: ${last?.status ?? 'waiting for Cloudflare check'}${last?.conclusion ? ` (${last.conclusion})` : ''}`);
+              if (last?.status === 'completed') {
+                await core.summary
+                  .addHeading('Cloudflare deployment')
+                  .addRaw(`Commit: ${context.sha}\n\nResult: ${last.conclusion}\n\n`)
+                  .addLink('Cloudflare build and deployment logs', last.details_url)
+                  .addRaw(`\n\n${last.output?.summary ?? ''}\n`)
+                  .write();
+                if (last.conclusion !== 'success') {
+                  core.setFailed(`Cloudflare deployment finished with: ${last.conclusion}`);
+                }
+                return;
+              }
+              await new Promise(resolve => setTimeout(resolve, 15000));
+            }
+            await core.summary.addHeading('Cloudflare deployment timed out')
+              .addRaw(`No completed Cloudflare check for commit ${context.sha} within 30 minutes. Check Workers Builds and its GitHub integration.\n`)
+              .write();
+            core.setFailed('Timed out waiting for Cloudflare deployment.');

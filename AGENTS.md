@@ -47,6 +47,18 @@ npx --no-install @astryxdesign/cli doctor --built .next
 
 When intentionally upgrading, update all installed `@astryxdesign/*` packages together to a compatible release, run `npx @astryxdesign/cli upgrade --from <old-core-version> --apply`, and regenerate `.agents/astryx.md` with the init command above.
 
+### Cloudflare deployments
+
+[Upstream skills](https://github.com/cloudflare/skills)
+
+- For any deployment-related work (hosting, CI/CD, build status, domains, configuration, or troubleshooting), read and apply the `cloudflare` skill from this source first, then the relevant product/tool skill. Use the installed Cloudflare plugin skills or project-local `.agents/skills/<name>/SKILL.md`.
+- If unavailable, install the needed skill with `npx skills add https://github.com/cloudflare/skills --skill <name> --yes`. Do not upgrade installed skills on routine tasks.
+- Follow `cloudflare` for CLI selection: use `wrangler` for existing Wrangler projects and `cf-cli` otherwise. For Next.js deployment changes, load `nextjs-on-cloudflare`; for Worker code/configuration, load `workers-best-practices`. Preserve the existing hosting architecture unless a migration is requested.
+- This repository deploys through Cloudflare Workers Builds (`superintuition`). Preserve that Git integration and avoid adding a second deployment trigger in Actions.
+- Keep `.github/workflows/cloudflare-deployment.yml` reporting the Cloudflare check for the exact pushed commit on `main`. Actions must show waiting, success, failure, and timeout, with a link to Cloudflare build logs. Update the expected check name if the Worker is renamed. Manual workflow runs observe the selected ref; they do not trigger a Cloudflare rebuild. Rerun Actions after retrying a Cloudflare build.
+- Use minimal GitHub token permissions and never commit credentials. The status workflow needs only `checks: read` and no Cloudflare API token. Detailed build/runtime logs remain in Cloudflare; Actions links to build logs.
+- After pushing, inspect both the Actions run and its matching Cloudflare check. Verify the deployed application and displayed version separately before claiming the live deployment is verified.
+
 ### Git commits
 
 [Upstream skill](https://www.skills.sh/github/awesome-copilot/git-commit) · [Local skill](.agents/skills/git-commit/SKILL.md)

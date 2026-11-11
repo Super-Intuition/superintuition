@@ -1,4 +1,4 @@
-# Agent instructions
+# Agent-agnostic instructions
 
 ## Development
 
@@ -19,9 +19,9 @@
 
 - Do not install, initialize, or run gstack unless the user explicitly requests reinstalling it.
 
-Assume the tools and skills below are installed. Read the relevant local instructions and use local commands first; routine use does not require web searches or update checks. If missing, install with the listed commands before proceeding. Upstream links are references for installation, troubleshooting, and intentional updates. Review updates, refresh local instructions, and run relevant checks; do not upgrade on every task.
+Read the relevant local instructions and use local commands first; routine use does not require web searches or update checks. If missing, install with the listed commands before proceeding. Upstream links are references for installation, troubleshooting, and intentional updates. Review updates, refresh local instructions, and run relevant checks; do not upgrade on every task.
 
-### Astryx
+### Design System: Meta Astryx
 
 [Upstream guide](https://astryx.atmeta.com/docs/getting-started) · [Local generated conventions](.agents/astryx.md)
 
@@ -49,7 +49,7 @@ npx --no-install @astryxdesign/cli doctor --built .next
 
 When intentionally upgrading, update all installed `@astryxdesign/*` packages together to a compatible release, run `npx @astryxdesign/cli upgrade --from <old-core-version> --apply`, and regenerate `.agents/astryx.md` with the init command above.
 
-### Cloudflare deployments
+### Deployments: Cloudflare
 
 [Upstream skills](https://github.com/cloudflare/skills)
 
@@ -62,7 +62,7 @@ When intentionally upgrading, update all installed `@astryxdesign/*` packages to
 - After Workers Builds succeeds, run `scripts/check-deployment.mjs` against the HTTPS URL in the `DEPLOYMENT_URL` Actions repository variable. Fail the run on HTTP errors, API error/warning responses, invalid response shapes, or a displayed version mismatch. Keep health-check tests in `scripts/check-deployment.test.mjs`. These checks flag unhealthy deployments; they do not roll them back or detect every browser/runtime warning.
 - After pushing, inspect both the Actions run and its matching Cloudflare check. Verify the deployed application and displayed version separately before claiming the live deployment is verified.
 
-### Git commits
+### Versioning: Git commits
 
 [Upstream skill](https://www.skills.sh/github/awesome-copilot/git-commit) · [Local skill](.agents/skills/git-commit/SKILL.md)
 
@@ -70,7 +70,7 @@ Read `.agents/skills/git-commit/SKILL.md` before committing; follow its diff rev
 
 If missing: `npx skills add https://github.com/github/awesome-copilot --skill git-commit --yes`.
 
-### Security
+### Security: Cloudflare Security Audit
 
 [Upstream skill](https://github.com/cloudflare/security-audit-skill) · [Local skill](.agents/skills/security-audit/SKILL.md)
 
@@ -90,9 +90,3 @@ node .agents/skills/security-audit/validate-findings.cjs <audit-dir>/findings.js
 - Run `npm run typecheck` for TypeScript changes and `npm run build` for application/dependency changes, plus focused tests for changed behavior. For UI changes, inspect affected states at desktop/mobile widths and in light/dark modes, and run Astryx doctor above; resolve failures and inspect warnings.
 - Before committing, run `git diff --check`. Documentation-only work needs an instructions/links review, not an application rebuild.
 - Report changes, checks, commit/push results, and remaining limitations accurately.
-
-## Response completion
-
-End every final response with this exact sentence on its own line:
-
-Codex has completed responding

@@ -1,16 +1,199 @@
-node_modules
-.next
-out
+# ─── Dependencies ────────────────────────────────────────────────
+node_modules/
+
+# Lockfiles (pnpm is the package manager — see pnpm-workspace.yaml)
+package-lock.json
+yarn.lock
+
+# Package tarballs
+*.tgz
+packages/cli/*.tgz
+
+# ─── Build outputs ───────────────────────────────────────────────
 build
-.DS_Store
-
-# env — never commit secrets
-.env
-.env.local
-.env*.local
-
+dist/
+out
+out/
+out-e2e
+.next
+.next/
+.vinext
+.vite/
+.turbo/
 *.tsbuildinfo
 next-env.d.ts
+storybook-static/
 
+# Legacy Turbo cache
+.turbo/
+
+# App-specific build outputs
+apps/sandbox/.next/
+apps/sandbox/out/
+apps/sandbox/next-env.d.ts
+apps/example-nextjs-tailwind/.next
+
+# Re-include vendored dist for @types/next upstream
+!packages/types/next/upstream/dist/
+!packages/types/next/upstream/dist/**
+
+# ─── Cloudflare / Wrangler ───────────────────────────────────────
+# Miniflare drops a `cf.json` cache beside the cwd whenever `--local`
+# boots a runtime, including when cf is run from inside this repo.
+.wrangler/
+.cloudflare/
+
+# Fixture-project working state. The fixtures live in the cf
+# workspace (see `pnpm-workspace.yaml`) so deps resolve normally;
+# only Miniflare's local state directory needs ignoring.
+fixtures/*/.wrangler/
+fixtures/*/.cloudflare/
+
+# Generator plugin, built by cf#task:generate:plugin
+packages/cli/generator/cli.wasm
+
+# ─── Fixture node_modules allow-list ─────────────────────────────
+!tests/e2e/cloudflare-workers/fixtures/client-module-with-package-type/node_modules/
+tests/e2e/cloudflare-workers/fixtures/client-module-with-package-type/node_modules/*
+!tests/e2e/cloudflare-workers/fixtures/client-module-with-package-type/node_modules/lib-cjs/
+!tests/e2e/cloudflare-workers/fixtures/client-module-with-package-type/node_modules/lib-cjs/**
+!tests/e2e/cloudflare-workers/fixtures/client-module-with-package-type/node_modules/lib-esm/
+!tests/e2e/cloudflare-workers/fixtures/client-module-with-package-type/node_modules/lib-esm/**
+!tests/fixtures/cf-app-basic/node_modules/
+tests/fixtures/cf-app-basic/node_modules/*
+!tests/fixtures/cf-app-basic/node_modules/module-identity-dependency/
+!tests/fixtures/cf-app-basic/node_modules/module-identity-dependency/**
+!tests/fixtures/cf-app-basic/node_modules/pages-only-dependency/
+!tests/fixtures/cf-app-basic/node_modules/pages-only-dependency/**
+
+# ─── Secrets / env — never commit ────────────────────────────────
+.env
+.env.*
+.env.local
+.env*.local
+.env.*.local
+!.env.example
+# wrangler convention for local-only secrets passed to `wrangler dev`
+.dev.vars
+.dev.vars.*
+*.token
+.cf.token
+
+# ─── Logs / coverage / reports ───────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+coverage/
+reports/
+
+# ─── Testing ─────────────────────────────────────────────────────
+test-results/
+playwright-report/
+e2e/test-results/
+e2e/playwright-report/
+e2e/playwright/.cache/
+.vitest/
+.ecosystem-test/
+.parity-test-results.json
+.worktree-parity-test
+
+# ─── Worktrees ───────────────────────────────────────────────────
+# Scratch git worktrees. These live inside the repo for convenience, so without
+# an ignore a `git add -A` in the main tree sweeps an entire second checkout
+# into the commit.
+.worktrees/
+worktrees/
+
+# ─── Reference clones ────────────────────────────────────────────
+# Next.js reference clone (for searching source/tests)
+.nextjs-ref/
+.nextjs-ref*
+
+# ─── Nix ─────────────────────────────────────────────────────────
+result
+result-*
+# The Nix `result` pattern above also matches Next.js compat fixture routes
+# named `result`; re-include them so they don't silently fall out of tracking.
+!tests/fixtures/root-layout-redirect/app/result/
+.direnv/
+.corepack/
+
+# ─── Node version managers ───────────────────────────────────────
+# .nvmrc is the single source — CI reads it via node-version-file.
+# Ignored so a personal asdf/mise/nodenv file cannot drift from it.
+# If the team ever moves to one of these, delete the matching line
+# here first — otherwise the new file is silently left out of the commit.
+.node-version
+.tool-versions
+mise.toml
+
+# ─── Lint ────────────────────────────────────────────────────────
+.eslintcache
+
+# ─── Patches ─────────────────────────────────────────────────────
+*.patch
+*.rej
+
+# ─── OS / editors ────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ─── Agent tooling ───────────────────────────────────────────────
 # Claude Code tool-local skill discovery symlinks
 .claude/
+**/.claude/*
+!/.claude/skills/
+.codex/
+.opencode/plans
+
+# ─── Docs / PR assets ────────────────────────────────────────────
+# One-off PR evidence is attached or linked from the PR, not source assets.
+/docs/pr-assets/
+
+# PR browser accessibility runner output (pnpm test:a11y-contract:pr)
+/pr-a11y-evidence/
+/pr-a11y-output/
+
+# ─── Generated artifacts ─────────────────────────────────────────
+# Generated shadcn Registry output (rebuilt by the docsite generate step)
+apps/docsite/public/shadcn/
+
+# Generated i18n artifacts (rebuilt from en.json, translated catalogs, and the keys Core modules name)
+packages/core/locales/pseudo.json
+packages/core/src/i18n/generated-locales/
+packages/core/src/i18n/generated-english/
+
+# Generated lab readiness report (rebuild with `pnpm lab:readiness`).
+# Deliberately not committed: a checked-in snapshot goes stale the moment the
+# source tree moves, and a stale score read as current is what this tooling
+# exists to prevent. CI runs `pnpm lab:readiness:check` instead, which fails
+# when the manifest's claims no longer match the repo.
+apps/storybook/.lab-readiness/
+apps/storybook/.storybook/lab-readiness/
+
+# RTL audit generated scorecard (relationship-based; never committed as a baseline)
+rtl-audit-report.json
+
+# Vibe tests (large generated files)
+internal/vibe-tests/results/
+internal/vibe-tests/.fixture-runs/
+
+# Leaked temp fixtures from the oxlint prefer-shared-utils rule test
+# (normally cleaned up in afterEach; ignore so a crashed run can't commit them).
+__lint_rule_fixtures__-*
+
+# Astryx agent docs and test scratch directories (generated)
+# A test that makes a scratch folder inside the repository lists it here:
+# the Playwright spec search skips what this file lists. A leading **/
+# makes Playwright match at any depth.
+**/.astryx-*/
+.tmp-theme-app-types-*/
+tmp-swizzle-*-test/
+packages/cli/.tmp-component-icons-*/
+packages/themes/*/.tmp-media-accent-*/

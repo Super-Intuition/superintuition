@@ -17,6 +17,8 @@
 
 ## Local tools and skills
 
+- Do not install, initialize, or run gstack unless the user explicitly requests reinstalling it.
+
 Assume the tools and skills below are installed. Read the relevant local instructions and use local commands first; routine use does not require web searches or update checks. If missing, install with the listed commands before proceeding. Upstream links are references for installation, troubleshooting, and intentional updates. Review updates, refresh local instructions, and run relevant checks; do not upgrade on every task.
 
 ### Astryx

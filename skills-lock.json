@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "skills": {
+    "cloudflare": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloudflare/SKILL.md",
+      "computedHash": "a40c5c77e4b96b0f6603a54e67bf2ff401a872366af48ff8f6ae0e872d4ad324"
+    },
+    "nextjs-on-cloudflare": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "skillPath": "skills/nextjs-on-cloudflare/SKILL.md",
+      "computedHash": "5da56bb44703eb542ee923ddf428a4c12c3d97cbeb50bd34b9d8aa3b68d33836"
+    },
+    "workers-best-practices": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "skillPath": "skills/workers-best-practices/SKILL.md",
+      "computedHash": "7f941bbc549454872a4c7c261bf75a1ef7aaa69666bc85cec91e97cf40c11cc6"
+    }
+  }
+}

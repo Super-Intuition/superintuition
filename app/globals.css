@@ -1,5 +1,12 @@
 @import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/preflight.css" layer(base);
+/* Load Tailwind preflight into `reset`, not `base`. Astryx's own stylesheets
+   pin the order `reset < astryx-base < astryx-theme`, and the browser appends
+   later-seen layers (theme/base/components/utilities) AFTER those. With
+   preflight in `base`, its `*{padding:0}` lands after astryx-base and wipes
+   every Astryx padding atom app-wide. Putting it in `reset` keeps it before
+   astryx-base, so component padding survives while box-sizing/border resets
+   still apply. */
+@import "tailwindcss/preflight.css" layer(reset);
 @import "@astryxdesign/core/reset.css";
 @import "@astryxdesign/core/astryx.css";
 @import "@astryxdesign/core/tailwind-theme.css";

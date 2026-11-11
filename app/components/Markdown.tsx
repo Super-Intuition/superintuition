@@ -24,7 +24,7 @@ function renderInline(text: string, keyBase: string): ReactNode[] {
         <Code
           key={`${keyBase}-${k++}`}
           size="inherit"
-          className="text-text-blue"
+          className="text-blue-vivid"
         >
           {token.slice(1, -1)}
         </Code>,

@@ -34,13 +34,13 @@ function Gutter({ value }: { value: number | null | undefined }) {
 function Row({ row }: { row: DiffRow }) {
   if (row.type === "hunk") {
     return (
-      <HStack gap={0} className="bg-background-blue">
+      <HStack gap={0} className="bg-blue-subtle">
         <HStack
           paddingInline={3}
           paddingBlock={0.5}
           className="min-w-0 flex-1"
         >
-          <Text type="code" color="accent" className="whitespace-pre-wrap break-all">
+          <Text type="code" className="whitespace-pre-wrap break-all text-blue-vivid">
             {row.content}
           </Text>
         </HStack>
@@ -50,9 +50,9 @@ function Row({ row }: { row: DiffRow }) {
 
   const bg =
     row.type === "add"
-      ? "bg-background-green"
+      ? "bg-green-subtle"
       : row.type === "del"
-        ? "bg-background-red"
+        ? "bg-red-subtle"
         : "";
   const sign = row.type === "add" ? "+" : row.type === "del" ? "-" : " ";
 
@@ -107,12 +107,12 @@ export default function DiffFile({ file }: { file: PullFile }) {
         </HStack>
         <HStack align="center" gap={3} className="shrink-0">
           {file.additions > 0 && (
-            <Text type="code" hasTabularNumbers className="text-text-green">
+            <Text type="code" hasTabularNumbers className="text-green-vivid">
               +{file.additions}
             </Text>
           )}
           {file.deletions > 0 && (
-            <Text type="code" hasTabularNumbers className="text-text-red">
+            <Text type="code" hasTabularNumbers className="text-red-vivid">
               -{file.deletions}
             </Text>
           )}

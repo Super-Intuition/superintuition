@@ -63,8 +63,11 @@ export default function Home() {
         ]);
         setRepo(r);
         setPulls(p);
-        if (p.length) setActive(p[0].number);
-        else setLoading(false);
+        if (p.length) {
+          // Default the review session to PR #2 when present, else the first.
+          const start = p.find((x) => x.number === 2) ?? p[0];
+          setActive(start.number);
+        } else setLoading(false);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Failed to load repo");
         setLoading(false);
@@ -224,7 +227,7 @@ export default function Home() {
                         <Text
                           type="supporting"
                           hasTabularNumbers
-                          className="text-text-green"
+                          className="text-green-vivid"
                         >
                           +{detail.additions}
                         </Text>
@@ -233,7 +236,7 @@ export default function Home() {
                         <Text
                           type="supporting"
                           hasTabularNumbers
-                          className="text-text-red"
+                          className="text-red-vivid"
                         >
                           -{detail.deletions}
                         </Text>

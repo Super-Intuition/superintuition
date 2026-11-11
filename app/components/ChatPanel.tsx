@@ -92,7 +92,7 @@ export default function ChatPanel({ prNumber }: { prNumber: number }) {
           </HStack>
           <HStack align="center" justify="between">
             <HStack align="center" gap={1.5}>
-              <VStack className="h-2 w-2 animate-pulse rounded-full bg-text-green" />
+              <VStack className="h-2 w-2 animate-pulse rounded-full bg-green-vivid" />
               <Text type="supporting">Listening…</Text>
             </HStack>
             <HStack gap={1}>
@@ -127,7 +127,7 @@ export default function ChatPanel({ prNumber }: { prNumber: number }) {
           >
             <Text type="supporting">✦ Highlighted in PR</Text>
             <Text type="code" color="secondary">
-              Ask Peer <Code color="inherit" className="text-text-blue">export const CALLING_HOURS</Code> = {"{…}"}
+              Ask Peer <Code color="inherit" className="text-blue-vivid">export const CALLING_HOURS</Code> = {"{…}"}
             </Text>
           </VStack>
           <CandidateBubble>What do these lines of code do?</CandidateBubble>

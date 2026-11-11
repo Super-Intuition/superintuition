@@ -2,6 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { Text } from "@astryxdesign/core/Text";
+import { Heading } from "@astryxdesign/core/Heading";
+import { Badge } from "@astryxdesign/core/Badge";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Selector } from "@astryxdesign/core/Selector";
+import { HStack } from "@astryxdesign/core/Stack";
 import packageInfo from "@/package.json";
 import type { PullSummary, PullDetail, PullFile, RepoMeta } from "@/lib/github";
 import ConversationPanel from "./components/ConversationPanel";
@@ -70,38 +75,53 @@ export default function Home() {
   }, [active]);
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden">
+    <div className="flex h-screen flex-col overflow-hidden bg-body text-primary">
       {/* top bar */}
-      <header className="flex h-12 shrink-0 items-center justify-between border-b border-[var(--border)] bg-[var(--panel)] px-4">
-        <div className="flex items-center gap-3">
-          <Logo className="h-6 w-6 text-[var(--text)]" />
-          <span className="text-sm font-semibold">SuperIntuition</span>
+      <HStack
+        align="center"
+        justify="between"
+        gap={3}
+        paddingInline={4}
+        className="h-12 shrink-0 border-b border-border bg-surface"
+      >
+        <HStack align="center" gap={3}>
+          <Logo className="h-6 w-6 text-primary" />
+          <Text weight="semibold" type="label">
+            SuperIntuition
+          </Text>
           {repo && (
-            <span className="mono hidden rounded border border-[var(--border)] px-2 py-0.5 text-xs text-[var(--text-muted)] md:inline">
-              {repo.full}
-              {repo.private && <span className="ml-1 text-[#d29922]">· private</span>}
-            </span>
+            <HStack align="center" gap={2} className="hidden md:flex">
+              <Text type="code" color="secondary">
+                {repo.full}
+              </Text>
+              {repo.private && <Badge variant="yellow" label="private" />}
+            </HStack>
           )}
-        </div>
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-[var(--text-muted)]">PR</label>
-          <select
-            value={active ?? ""}
-            onChange={(e) => setActive(Number(e.target.value))}
-            disabled={!pulls.length}
-            className="mono max-w-24 rounded border border-[var(--border)] bg-[var(--panel-2)] px-2 py-1 text-xs text-[var(--text)] focus:outline-none sm:max-w-96"
+        </HStack>
+        <HStack align="center" gap={2}>
+          <Selector
+            label="Pull request"
+            isLabelHidden
+            size="sm"
+            placeholder="No pull requests"
+            value={active != null ? String(active) : undefined}
+            onChange={(v) => setActive(Number(v))}
+            isDisabled={!pulls.length}
+            options={pulls.map((p) => ({
+              value: String(p.number),
+              label: `#${p.number} · ${p.title}`,
+            }))}
+          />
+          <Text
+            type="supporting"
+            textWrap="nowrap"
+            className="shrink-0"
+            aria-label={`App version ${version}`}
           >
-            {pulls.map((p) => (
-              <option key={p.number} value={p.number}>
-                #{p.number} · {p.title}
-              </option>
-            ))}
-          </select>
-          <Text type="supporting" textWrap="nowrap" className="shrink-0" aria-label={`App version ${version}`}>
             v{version}
           </Text>
-        </div>
-      </header>
+        </HStack>
+      </HStack>
 
       {/* body: three columns */}
       <div className="grid min-h-0 flex-1 grid-cols-[minmax(280px,340px)_1fr_minmax(300px,380px)]">
@@ -110,63 +130,72 @@ export default function Home() {
           {detail ? (
             <ConversationPanel pull={detail} />
           ) : (
-            <div className="h-full border-r border-[var(--border)] bg-[var(--panel)]" />
+            <div className="h-full border-r border-border bg-surface" />
           )}
         </div>
 
         {/* center: diff */}
-        <main className="min-h-0 overflow-y-auto bg-[var(--bg)] p-4">
+        <main className="min-h-0 overflow-y-auto bg-body p-4">
           {error && (
-            <div className="rounded-md border border-[var(--del-border)] bg-[var(--del-bg)] px-4 py-3 text-sm text-[#ff7b72]">
-              {error}
-              {error.includes("not set") && (
-                <p className="mt-1 text-xs text-[var(--text-muted)]">
-                  Copy <span className="mono">.env.example</span> to{" "}
-                  <span className="mono">.env</span> and set GITHUB_TOKEN /
-                  GITHUB_REPO.
-                </p>
-              )}
-            </div>
+            <Banner
+              status="error"
+              container="card"
+              title={error}
+              description={
+                error.includes("not set") ? (
+                  <Text type="supporting">
+                    Copy <span className="font-mono">.env.example</span> to{" "}
+                    <span className="font-mono">.env</span> and set GITHUB_TOKEN
+                    / GITHUB_REPO.
+                  </Text>
+                ) : undefined
+              }
+              collapsible={false}
+            />
           )}
           {loading && !error && (
-            <div className="text-sm text-[var(--text-muted)]">Loading…</div>
+            <Text type="supporting">Loading…</Text>
           )}
           {!loading && !error && detail && (
-            <div className="space-y-4">
-              <div className="flex items-baseline gap-2">
-                <h1 className="text-lg font-semibold text-[var(--text)]">
+            <div className="flex flex-col gap-4">
+              <HStack align="center" gap={2}>
+                <Heading level={1} weight="semibold">
                   {detail.title}
-                </h1>
-                <span className="mono text-sm text-[var(--text-muted)]">
+                </Heading>
+                <Text color="secondary" className="font-mono">
                   #{detail.number}
-                </span>
-              </div>
-              <div className="mono flex flex-wrap gap-3 text-xs text-[var(--text-muted)]">
-                <span>{files.length} files changed</span>
+                </Text>
+              </HStack>
+              <HStack gap={3} wrap="wrap" className="font-mono">
+                <Text type="supporting">{files.length} files changed</Text>
                 {detail.additions != null && (
-                  <span className="text-[#3fb950]">+{detail.additions}</span>
+                  <Text type="supporting" className="text-text-green">
+                    +{detail.additions}
+                  </Text>
                 )}
                 {detail.deletions != null && (
-                  <span className="text-[#f85149]">-{detail.deletions}</span>
+                  <Text type="supporting" className="text-text-red">
+                    -{detail.deletions}
+                  </Text>
                 )}
-                <span>
+                <Text type="supporting">
                   {detail.baseRef} ← {detail.headRef}
-                </span>
-              </div>
+                </Text>
+              </HStack>
               {files.map((f) => (
                 <DiffFile key={f.filename} file={f} />
               ))}
             </div>
           )}
           {!loading && !error && !detail && !pulls.length && (
-            <div className="text-sm text-[var(--text-muted)]">
+            <Text type="supporting">
               No pull requests found in this repository.
-            </div>
+            </Text>
           )}
         </main>
 
         {/* right: chat */}
-        <div className="min-h-0 overflow-hidden border-l border-[var(--border)]">
+        <div className="min-h-0 overflow-hidden border-l border-border">
           <ChatPanel prNumber={active ?? 0} />
         </div>
       </div>

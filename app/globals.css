@@ -5,27 +5,12 @@
 @import "@astryxdesign/core/tailwind-theme.css";
 @import "tailwindcss/utilities.css" layer(utilities);
 
-/* Bridge existing surfaces to the theme during incremental migration. */
+/* App-wide base: dark neutral theme tokens drive every surface. */
 @layer components {
-  [data-astryx-theme] {
-    --bg: var(--color-background-body);
-    --panel: var(--color-background-surface);
-    --panel-2: var(--color-background-muted);
-    --border: var(--color-border);
-    --border-muted: var(--color-border);
-    --text: var(--color-text-primary);
-    --text-muted: var(--color-text-secondary);
-    --accent: var(--color-accent);
-    --add-bg: var(--color-background-green);
-    --add-border: var(--color-border-green);
-    --del-bg: var(--color-background-red);
-    --del-border: var(--color-border-red);
-  }
-
   html,
   body {
-    background: var(--bg);
-    color: var(--text);
+    background: var(--color-background-body);
+    color: var(--color-text-primary);
     height: 100%;
   }
 
@@ -33,24 +18,19 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  .mono {
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
-      "Liberation Mono", monospace;
-  }
-
   /* Scrollbars follow the active theme. */
   * {
     scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
+    scrollbar-color: var(--color-border) transparent;
   }
   *::-webkit-scrollbar {
     width: 10px;
     height: 10px;
   }
   *::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 6px;
-    border: 2px solid var(--bg);
+    background: var(--color-border);
+    border-radius: var(--radius-md);
+    border: 2px solid var(--color-background-body);
   }
   *::-webkit-scrollbar-track {
     background: transparent;

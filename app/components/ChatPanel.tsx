@@ -1,23 +1,30 @@
 "use client";
 
 import { useState } from "react";
+import { Card } from "@astryxdesign/core/Card";
+import { Text } from "@astryxdesign/core/Text";
+import { Icon } from "@astryxdesign/core/Icon";
+import { IconButton } from "@astryxdesign/core/IconButton";
+import { TextArea } from "@astryxdesign/core/TextArea";
+import { HStack, VStack } from "@astryxdesign/core/Stack";
 import Logo from "./Logo";
 
 function AssistantMsg({ children }: { children: React.ReactNode }) {
   return (
-    <div className="space-y-1.5">
-      <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
-        <Logo className="h-4 w-4 text-[var(--text)]" /> SuperIntuition
-      </div>
-      <p className="text-[13px] leading-5 text-[var(--text)]">{children}</p>
-    </div>
+    <VStack gap={1.5}>
+      <HStack align="center" gap={1.5}>
+        <Logo className="h-4 w-4 text-primary" />
+        <Text type="supporting">SuperIntuition</Text>
+      </HStack>
+      <Text className="text-[13px] leading-5">{children}</Text>
+    </VStack>
   );
 }
 
 function CandidateBubble({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex justify-end">
-      <div className="max-w-[80%] rounded-lg bg-[#1f6feb] px-3 py-1.5 text-[13px] text-white">
+      <div className="max-w-[80%] rounded-lg bg-accent px-3 py-1.5 text-[13px] text-on-accent">
         {children}
       </div>
     </div>
@@ -30,11 +37,11 @@ function Waveform() {
     Math.round(6 + Math.abs(Math.sin(i * 0.9)) * 26),
   );
   return (
-    <div className="flex h-24 w-full items-center justify-center gap-[3px] rounded-md bg-[var(--panel-2)] px-3">
+    <div className="flex h-24 w-full items-center justify-center gap-[3px] rounded-md bg-muted px-3">
       {bars.map((h, i) => (
         <span
           key={i}
-          className="w-[3px] rounded-full bg-[#539bf5]"
+          className="w-[3px] rounded-full bg-text-blue"
           style={{ height: `${h}px`, opacity: 0.5 + (h / 32) * 0.5 }}
         />
       ))}
@@ -46,97 +53,119 @@ export default function ChatPanel({ prNumber }: { prNumber: number }) {
   const [draft, setDraft] = useState("");
 
   return (
-    <div className="flex h-full flex-col gap-3 bg-[var(--bg)] p-3">
+    <div className="flex h-full flex-col gap-3 bg-body p-3">
       {/* Voice / call card */}
-      <div className="space-y-4 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
-        <AssistantMsg>
-          You have access to the Ringback repo. Let&apos;s go through a mock code
-          review session. Ready?
-        </AssistantMsg>
-        <CandidateBubble>Yes, I&apos;m ready</CandidateBubble>
-        <AssistantMsg>
-          Here&apos;s the first PR. Does anything look suspicious to you in this
-          code?
-        </AssistantMsg>
-        <div className="grid grid-cols-2 gap-2">
-          <Waveform />
-          <div className="flex h-24 items-center justify-center rounded-md bg-[var(--panel-2)] text-xs text-[var(--text-muted)]">
-            camera off
+      <Card padding={4}>
+        <VStack gap={4}>
+          <AssistantMsg>
+            You have access to the Ringback repo. Let&apos;s go through a mock
+            code review session. Ready?
+          </AssistantMsg>
+          <CandidateBubble>Yes, I&apos;m ready</CandidateBubble>
+          <AssistantMsg>
+            Here&apos;s the first PR. Does anything look suspicious to you in
+            this code?
+          </AssistantMsg>
+          <div className="grid grid-cols-2 gap-2">
+            <Waveform />
+            <div className="flex h-24 items-center justify-center rounded-md bg-muted text-xs text-secondary">
+              camera off
+            </div>
           </div>
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-[#3fb950]" />
-            Listening…
-          </div>
-          <div className="flex gap-2">
-            <button className="flex h-7 w-7 items-center justify-center rounded-full border border-[var(--border)] text-[var(--text-muted)] hover:bg-[var(--panel-2)]">
-              🎤
-            </button>
-            <button className="flex h-7 w-7 items-center justify-center rounded-full border border-[var(--border)] text-[var(--text-muted)] hover:bg-[var(--panel-2)]">
-              ✎
-            </button>
-          </div>
-        </div>
-      </div>
+          <HStack align="center" justify="between">
+            <HStack align="center" gap={1.5}>
+              <span className="h-2 w-2 animate-pulse rounded-full bg-text-green" />
+              <Text type="supporting">Listening…</Text>
+            </HStack>
+            <HStack gap={2}>
+              <IconButton
+                variant="ghost"
+                size="sm"
+                label="Mute microphone"
+                icon={<Icon icon="microphone" />}
+              />
+              <IconButton
+                variant="ghost"
+                size="sm"
+                label="Edit"
+                icon={<Icon icon="wrench" />}
+              />
+            </HStack>
+          </HStack>
+        </VStack>
+      </Card>
 
       {/* Ask card */}
-      <div className="flex min-h-0 flex-1 flex-col rounded-lg border border-[var(--border)] bg-[var(--panel)]">
-        <div className="space-y-3 overflow-y-auto p-4">
-          <div className="rounded-md border border-[var(--border)] bg-[var(--panel-2)] px-3 py-2">
-            <div className="mb-1 flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
-              ✦ Highlighted in PR
-            </div>
-            <div className="mono text-xs text-[var(--text-muted)]">
-              Ask Peer <span className="text-[#79c0ff]">export const CALLING_HOURS</span> = {"{…}"}
-            </div>
+      <div className="flex min-h-0 flex-1 flex-col rounded-lg border border-border bg-surface">
+        <VStack gap={3} padding={4} isScrollable className="min-h-0">
+          <div className="rounded-md border border-border bg-muted px-3 py-2">
+            <HStack align="center" gap={1.5} className="mb-1">
+              <Text type="supporting">✦ Highlighted in PR</Text>
+            </HStack>
+            <Text type="code" color="secondary" className="font-mono text-xs">
+              Ask Peer{" "}
+              <span className="text-text-blue">export const CALLING_HOURS</span>{" "}
+              = {"{…}"}
+            </Text>
           </div>
           <CandidateBubble>What do these line of code do?</CandidateBubble>
-          <div className="space-y-1">
-            <div className="mono text-[11px] text-[var(--text-muted)]">
+          <VStack gap={1}>
+            <Text type="supporting" className="font-mono text-[11px]">
               Ref: src/lib/calling-hours.ts:L6
-            </div>
-            <p className="text-[13px] leading-5 text-[var(--text)]">
+            </Text>
+            <Text className="text-[13px] leading-5">
               This checks whether the supplied time falls within calling hours:
               9:00 a.m. up to, but not including, 9:00 p.m.
-            </p>
-          </div>
-        </div>
+            </Text>
+          </VStack>
+        </VStack>
 
         {/* composer */}
-        <div className="mt-auto border-t border-[var(--border)] p-3">
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--panel-2)] px-3 py-2">
-            <textarea
+        <div className="mt-auto border-t border-border p-3">
+          <div className="rounded-lg border border-border bg-muted px-3 py-2">
+            <TextArea
+              label="Ask anything"
+              isLabelHidden
               value={draft}
-              onChange={(e) => setDraft(e.target.value)}
+              onChange={(v) => setDraft(v)}
               placeholder="Ask anything (⌘L)"
               rows={1}
-              className="w-full resize-none bg-transparent text-sm text-[var(--text)] placeholder:text-[var(--text-muted)] focus:outline-none"
             />
-            <div className="mt-2 flex items-center justify-between">
-              <button className="flex h-6 w-6 items-center justify-center rounded border border-[var(--border)] text-[var(--text-muted)]">
-                +
-              </button>
-              <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1 rounded border border-[var(--border)] px-2 py-1 text-xs text-[var(--text-muted)]">
+            <HStack align="center" justify="between" className="mt-2">
+              <IconButton
+                variant="ghost"
+                size="sm"
+                label="Add attachment"
+                icon={<Icon icon="upload" />}
+              />
+              <HStack align="center" gap={2}>
+                <span className="flex items-center gap-1 rounded border border-border px-2 py-1 text-xs text-secondary">
                   Opus 5.5 ▾
                 </span>
-                <button className="flex h-6 w-6 items-center justify-center rounded-full border border-[var(--border)] text-[var(--text-muted)]">
-                  🎤
-                </button>
-                <button
-                  className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--accent)] text-white disabled:opacity-40"
-                  disabled={!draft.trim()}
-                >
-                  ↑
-                </button>
-              </div>
-            </div>
+                <IconButton
+                  variant="ghost"
+                  size="sm"
+                  label="Dictate"
+                  icon={<Icon icon="microphone" />}
+                />
+                <IconButton
+                  variant="primary"
+                  size="sm"
+                  label="Send"
+                  isDisabled={!draft.trim()}
+                  icon={<Icon icon="arrowUp" />}
+                />
+              </HStack>
+            </HStack>
           </div>
-          <div className="mt-2 flex items-center justify-between text-xs text-[var(--text-muted)]">
-            <span className="flex items-center gap-1">▢ ringback</span>
-            <span>PR #{prNumber}</span>
-          </div>
+          <HStack
+            align="center"
+            justify="between"
+            className="mt-2 text-secondary"
+          >
+            <Text type="supporting">▢ ringback</Text>
+            <Text type="supporting">PR #{prNumber}</Text>
+          </HStack>
         </div>
       </div>
     </div>

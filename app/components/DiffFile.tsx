@@ -1,11 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { Text } from "@astryxdesign/core/Text";
+import { Icon } from "@astryxdesign/core/Icon";
+import { IconButton } from "@astryxdesign/core/IconButton";
+import { HStack } from "@astryxdesign/core/Stack";
 import type { PullFile } from "@/lib/github";
 import { parsePatch } from "@/lib/diff";
 
 function StatPill({ additions, deletions }: { additions: number; deletions: number }) {
-  // Five squares, GitHub-style: green for add, red for del, grey for none.
+  // Five squares, GitHub-style: green for add, red for del, neutral for none.
   const total = additions + deletions;
   const greens = total === 0 ? 0 : Math.round((additions / total) * 5);
   const reds = total === 0 ? 0 : Math.min(5 - greens, Math.ceil((deletions / total) * 5));
@@ -15,18 +19,20 @@ function StatPill({ additions, deletions }: { additions: number; deletions: numb
     return "none";
   });
   return (
-    <span className="flex items-center gap-2 mono text-xs">
-      {additions > 0 && <span className="text-[#3fb950]">+{additions}</span>}
-      {deletions > 0 && <span className="text-[#f85149]">-{deletions}</span>}
+    <span className="flex items-center gap-2 font-mono text-xs">
+      {additions > 0 && <span className="text-text-green">+{additions}</span>}
+      {deletions > 0 && <span className="text-text-red">-{deletions}</span>}
       <span className="flex gap-[2px]">
         {squares.map((s, i) => (
           <span
             key={i}
-            className="h-2 w-2 rounded-[2px]"
-            style={{
-              background:
-                s === "add" ? "#3fb950" : s === "del" ? "#f85149" : "#30363d",
-            }}
+            className={`h-2 w-2 rounded-[2px] ${
+              s === "add"
+                ? "bg-text-green"
+                : s === "del"
+                  ? "bg-text-red"
+                  : "bg-track"
+            }`}
           />
         ))}
       </span>
@@ -40,62 +46,65 @@ export default function DiffFile({ file }: { file: PullFile }) {
   const rows = parsePatch(file.patch);
 
   return (
-    <div className="rounded-md border border-[var(--border)] bg-[var(--panel)] overflow-hidden">
+    <div className="overflow-hidden rounded-md border border-border bg-surface">
       {/* file header */}
-      <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-[var(--border)] bg-[var(--panel-2)] px-3 py-2">
-        <div className="flex min-w-0 items-center gap-2">
-          <button
+      <HStack
+        align="center"
+        justify="between"
+        gap={3}
+        paddingInline={3}
+        paddingBlock={2}
+        className="sticky top-0 z-10 border-b border-border bg-muted"
+      >
+        <HStack align="center" gap={2} className="min-w-0">
+          <IconButton
+            variant="ghost"
+            size="sm"
+            label={open ? "Collapse" : "Expand"}
             onClick={() => setOpen((o) => !o)}
-            className="text-[var(--text-muted)] hover:text-[var(--text)] shrink-0"
-            aria-label={open ? "Collapse" : "Expand"}
-          >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 16 16"
-              fill="currentColor"
-              className={open ? "" : "-rotate-90"}
-              style={{ transition: "transform .15s" }}
-            >
-              <path d="M12.78 5.22a.75.75 0 0 0-1.06 0L8 8.94 4.28 5.22a.75.75 0 0 0-1.06 1.06l4.25 4.25a.75.75 0 0 0 1.06 0l4.25-4.25a.75.75 0 0 0 0-1.06Z" />
-            </svg>
-          </button>
-          <span className="mono truncate text-sm text-[var(--text)]">
+            icon={
+              <Icon
+                icon="chevronDown"
+                className={open ? "" : "-rotate-90"}
+              />
+            }
+          />
+          <Text className="truncate font-mono" type="code">
             {file.filename}
-          </span>
-        </div>
-        <div className="flex items-center gap-3 shrink-0">
+          </Text>
+        </HStack>
+        <HStack align="center" gap={3} className="shrink-0">
           <StatPill additions={file.additions} deletions={file.deletions} />
-          <label className="flex cursor-pointer items-center gap-1.5 rounded border border-[var(--border)] px-2 py-1 text-xs text-[var(--text-muted)] hover:bg-[var(--border-muted)]">
+          <label className="flex cursor-pointer items-center gap-1.5 rounded border border-border px-2 py-1 text-xs text-secondary hover:bg-muted">
             <input
               type="checkbox"
               checked={viewed}
               onChange={(e) => setViewed(e.target.checked)}
-              className="accent-[var(--accent)]"
+              className="accent-accent"
             />
             Viewed
           </label>
-        </div>
-      </div>
+        </HStack>
+      </HStack>
 
       {/* diff body */}
       {open && (
         <div className="overflow-x-auto">
           {rows.length === 0 ? (
-            <div className="px-4 py-3 text-xs text-[var(--text-muted)]">
+            <Text type="supporting" className="block px-4 py-3">
               {file.status === "renamed"
                 ? "File renamed — no content changes."
                 : "No textual diff available (binary or too large)."}
-            </div>
+            </Text>
           ) : (
-            <table className="mono w-full border-collapse text-[12px] leading-5">
+            <table className="w-full border-collapse font-mono text-[12px] leading-5">
               <tbody>
                 {rows.map((r, i) => {
                   if (r.type === "hunk") {
                     return (
-                      <tr key={i} className="bg-[#0b1b34] text-[#539bf5]">
-                        <td className="select-none border-r border-[var(--border)] px-2 text-right align-top" />
-                        <td className="select-none border-r border-[var(--border)] px-2 text-right align-top" />
+                      <tr key={i} className="bg-background-blue text-text-blue">
+                        <td className="select-none border-r border-border px-2 text-right align-top" />
+                        <td className="select-none border-r border-border px-2 text-right align-top" />
                         <td className="whitespace-pre-wrap px-3 py-0.5">
                           {r.content}
                         </td>
@@ -104,22 +113,22 @@ export default function DiffFile({ file }: { file: PullFile }) {
                   }
                   const bg =
                     r.type === "add"
-                      ? "bg-[var(--add-bg)]"
+                      ? "bg-background-green"
                       : r.type === "del"
-                        ? "bg-[var(--del-bg)]"
+                        ? "bg-background-red"
                         : "";
                   const sign =
                     r.type === "add" ? "+" : r.type === "del" ? "-" : " ";
                   return (
                     <tr key={i} className={bg}>
-                      <td className="w-[1%] select-none whitespace-nowrap border-r border-[var(--border-muted)] px-2 text-right align-top text-[var(--text-muted)]">
+                      <td className="w-[1%] select-none whitespace-nowrap border-r border-border px-2 text-right align-top text-secondary">
                         {r.oldLine ?? ""}
                       </td>
-                      <td className="w-[1%] select-none whitespace-nowrap border-r border-[var(--border-muted)] px-2 text-right align-top text-[var(--text-muted)]">
+                      <td className="w-[1%] select-none whitespace-nowrap border-r border-border px-2 text-right align-top text-secondary">
                         {r.newLine ?? ""}
                       </td>
-                      <td className="whitespace-pre-wrap px-3 align-top">
-                        <span className="select-none text-[var(--text-muted)]">
+                      <td className="whitespace-pre-wrap px-3 align-top text-primary">
+                        <span className="select-none text-secondary">
                           {sign}
                         </span>
                         {r.content}

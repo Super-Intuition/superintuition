@@ -17,7 +17,7 @@ function renderInline(text: string, keyBase: string): ReactNode[] {
       nodes.push(
         <code
           key={`${keyBase}-${k++}`}
-          className="mono rounded bg-[var(--panel-2)] px-1 py-0.5 text-[0.85em] text-[#79c0ff]"
+          className="font-mono rounded bg-muted px-1 py-0.5 text-[0.85em] text-text-blue"
         >
           {token.slice(1, -1)}
         </code>,
@@ -29,7 +29,7 @@ function renderInline(text: string, keyBase: string): ReactNode[] {
         <a
           key={`${keyBase}-${k++}`}
           href={href}
-          className="text-[var(--accent)] hover:underline"
+          className="text-accent hover:underline"
           target="_blank"
           rel="noreferrer"
         >
@@ -69,7 +69,7 @@ export default function Markdown({ source }: { source: string }) {
       out.push(
         <h3
           key={`h-${i}`}
-          className={`${size} mt-5 mb-2 font-semibold text-[var(--text)]`}
+          className={`${size} mt-5 mb-2 font-semibold text-primary`}
         >
           {renderInline(h[2], `h-${i}`)}
         </h3>,
@@ -86,9 +86,9 @@ export default function Markdown({ source }: { source: string }) {
             type="checkbox"
             checked={checked}
             readOnly
-            className="mt-1 accent-[var(--accent)]"
+            className="mt-1 accent-accent"
           />
-          <span className="text-[var(--text)]">
+          <span className="text-primary">
             {renderInline(task[2], `li-${i}`)}
           </span>
         </li>,
@@ -101,9 +101,9 @@ export default function Markdown({ source }: { source: string }) {
       list.push(
         <li
           key={`li-${i}`}
-          className="flex items-start gap-2 text-sm text-[var(--text)]"
+          className="flex items-start gap-2 text-sm text-primary"
         >
-          <span className="mt-[2px] text-[var(--text-muted)]">•</span>
+          <span className="mt-[2px] text-secondary">•</span>
           <span>{renderInline(bullet[1], `li-${i}`)}</span>
         </li>,
       );
@@ -115,7 +115,7 @@ export default function Markdown({ source }: { source: string }) {
       out.push(<div key={`sp-${i}`} className="h-2" />);
     } else {
       out.push(
-        <p key={`p-${i}`} className="my-1 text-sm leading-6 text-[var(--text)]">
+        <p key={`p-${i}`} className="my-1 text-sm leading-6 text-primary">
           {renderInline(line, `p-${i}`)}
         </p>,
       );

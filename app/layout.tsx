@@ -15,7 +15,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" data-astryx-theme="neutral" suppressHydrationWarning>
+    <html
+      lang="en"
+      data-astryx-theme="neutral"
+      style={{ colorScheme: "dark" }}
+      suppressHydrationWarning
+    >
       <body>
         <AppTheme>{children}</AppTheme>
       </body>

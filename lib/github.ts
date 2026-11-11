@@ -23,6 +23,7 @@ async function gh<T>(path: string, init?: RequestInit): Promise<T> {
     ...init,
     headers: {
       Accept: "application/vnd.github+json",
+      "User-Agent": "SuperIntuition",
       Authorization: `Bearer ${token}`,
       "X-GitHub-Api-Version": "2022-11-28",
       ...init?.headers,
